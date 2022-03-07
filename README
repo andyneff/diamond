@@ -1,0 +1,40 @@
+$ ./main_1
+ok
+foo_c version 1 100
+foo_c version 1 200
+$ ./main_2
+ok
+foo_c version 2 100
+foo_c version 2 200
+$ ./main_3
+ok
+foo_c version 1 100
+foo_c version 1 200
+$ ./main_4
+ok
+foo_c version 2 100
+foo_c version 2 200
+$ ./main_5
+ok
+foo_c version 2 100
+foo_c version 2 200
+$ ./main_6
+ok
+foo_c version 1 100
+foo_c version 1 200
+$ ./main_7
+ok
+foo_c version 1 100
+foo_c version 1 200
+$ ./main_8
+ok
+foo_c version 2 100
+foo_c version 2 200
+$ ./main_dyload
+dynamic ok
+foo_c version 1 100
+foo_c version 2 200
+foo_c version 1 100
+foo_c version 1 200
+foo_c version 1 100
+foo_c version 1 200
