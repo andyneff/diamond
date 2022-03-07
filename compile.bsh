@@ -2,44 +2,78 @@
 
 set -eux
 
-rm -f *.so *.o *.a main_*
+: ${GCC=gcc}
 
-gcc -c liba.c  -o liba_static.o
-gcc -c libb.c  -o libb_static.o
-gcc -c libc1.c -o libc1_static.o
-gcc -c libc2.c -o libc2_static.o
+# -DMAIN_FOO_C
+# -Wl,--default-symver
 
-gcc -c -fPIC liba.c  -o liba_dynamic.o
-gcc -c -fPIC libb.c  -o libb_dynamic.o
-gcc -c -fPIC libc1.c -o libc1_dynamic.o
-gcc -c -fPIC libc2.c -o libc2_dynamic.o
+case "${1-}" in
+  "")
+    "${GCC}" ${CFLAGS+${CFLAGS}} -c liba.c  -o liba_static.o
+    "${GCC}" ${CFLAGS+${CFLAGS}} -c libb.c  -o libb_static.o
+    "${GCC}" ${CFLAGS+${CFLAGS}} -c libc1.c -o libc1_static.o
+    "${GCC}" ${CFLAGS+${CFLAGS}} -c libc2.c -o libc2_static.o
 
-ar rcs libas.a  liba_static.o
-ar rcs libbs.a  libb_static.o
-ar rcs libc1s.a libc1_static.o
-ar rcs libc2s.a libc2_static.o
+    "${GCC}" ${CFLAGS+${CFLAGS}} -c -fPIC liba.c  -o liba_dynamic.o
+    "${GCC}" ${CFLAGS+${CFLAGS}} -c -fPIC libb.c  -o libb_dynamic.o
+    "${GCC}" ${CFLAGS+${CFLAGS}} -c -fPIC libc1.c -o libc1_dynamic.o
+    "${GCC}" ${CFLAGS+${CFLAGS}} -c -fPIC libc2.c -o libc2_dynamic.o
 
-gcc -Wl,-rpath . -shared libc1_dynamic.o -o libc1d.so
-gcc -Wl,-rpath . -shared libc2_dynamic.o -o libc2d.so
-gcc -Wl,-rpath . -shared liba_dynamic.o  -o libad.so -L. -lc1d
-gcc -Wl,-rpath . -shared libb_dynamic.o  -o libbd.so -L. -lc2d
+    ar rcs libas.a  liba_static.o
+    ar rcs libbs.a  libb_static.o
+    ar rcs libc1s.a libc1_static.o
+    ar rcs libc2s.a libc2_static.o
 
-gcc -Wl,-rpath . -fPIC -g -shared -o libmain.so -L. -lad -lbd -lc1d -lc2d
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . -shared libc1_dynamic.o -o libc1d.so
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . -shared libc2_dynamic.o -o libc2d.so
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . -shared -fPIC libc4.c -o libc4d.so
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . -shared liba_dynamic.o  -o libad.so -L. -lc1d
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . -shared libb_dynamic.o  -o libbd.so -L. -lc2d
 
-gcc -c main.c -o main.o
-gcc main.o -L. -las -lbs -lc1s -lc2s -o main_1
-gcc main.o -L. -las -lbs -lc2s -lc1s -o main_2
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . -fPIC -g -shared -o libmain.so -L. -lad -lbd -lc1d -lc2d
 
-gcc -Wl,-rpath . main.o -L. -lc1d -lc2d -lad -lbd -o main_3
-gcc -Wl,-rpath . main.o -L. -lc2d -lc1d -lad -lbd -o main_4
+    "${GCC}" ${CFLAGS+${CFLAGS}} -c main.c -o main.o
+    "${GCC}" ${CFLAGS+${CFLAGS}} -DMAIN_FOO_C -c main.c -o main_foo.o
 
-gcc -Wl,-rpath . main.o -L. -lc1s -lc2d -las -lbd -o main_5
-gcc -Wl,-rpath . main.o -L. -lc2s -lc1d -lad -lbs -o main_6
+    "${GCC}" ${CFLAGS+${CFLAGS}} main.o -L. -las -lbs -lc1s -lc2s -o main_1
+    "${GCC}" ${CFLAGS+${CFLAGS}} main.o -L. -las -lbs -lc2s -lc1s -o main_2
+    "${GCC}" ${CFLAGS+${CFLAGS}} -L. libc1s.a -lc2s main_foo.o -las -lbs -o main_foo_0
+    "${GCC}" ${CFLAGS+${CFLAGS}} main_foo.o -L. -las -lbs -lc1s -lc2s -o main_foo_1
+    "${GCC}" ${CFLAGS+${CFLAGS}} main_foo.o -L. -las -lbs -lc2s -lc1s -o main_foo_2
 
-gcc -Wl,-rpath . main.o -L. -lc1d -lc2s -lad -lbs -o main_7
-gcc -Wl,-rpath . main.o -L. -lc2d -lc1s -las -lbd -o main_8
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc1d -lc2d -lad -lbd -o main_3
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc2d -lc1d -lad -lbd -o main_4
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc1d -lc2d -lad -lbd -o main_foo_3
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc2d -lc1d -lad -lbd -o main_foo_4
 
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc1s -lc2d -las -lbd -o main_5
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc2s -lc1d -lad -lbs -o main_6
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc1s -lc2d -las -lbd -o main_foo_5
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc2s -lc1d -lad -lbs -o main_foo_6
 
-gcc maind.c -o main_dyload
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc1d -lc2s -lad -lbs -o main_7
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc2d -lc1s -las -lbd -o main_8
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc1d -lc2s -lad -lbs -o main_foo_7
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc2d -lc1s -las -lbd -o main_foo_8
 
-#  && /usr/bin/c++ -fPIC -fPIC -g   -shared  -o python/pyface3d/face3d.cpython-38-x86_64-linux-gnu.so python/pyface3d/CMakeFiles/pyface3d.dir/pyface3d.cxx.o  -Wl,-rpath,/usr/local/cuda/lib64:/usr/local/lib: face3d_basic/libface3d_basic.a face3d/libface3d.a dlib_build/libdlib.a face3d_basic/libface3d_basic.a external/vxl/lib/libvil_algo.a -lpthread dlib_build/libdlib.a -lopenblas /usr/local/cuda/lib64/libcublas.so -lcudnn /usr/local/cuda/lib64/libcurand.so /usr/local/cuda/lib64/libcusolver.so /usr/local/cuda/lib64/libcudart.so /usr/local/lib/libsqlite3.so external/vxl/lib/libvpgl_algo.a external/vxl/lib/libvpgl_file_formats.a external/vxl/lib/libvpgl.a external/vxl/lib/libvul.a external/vxl/lib/libvgl_algo.a external/vxl/lib/libvnl_algo.a external/vxl/lib/libvnl.a external/vxl/lib/libnetlib.a external/vxl/lib/libv3p_netlib.a external/vxl/lib/libvgl.a external/vxl/lib/libclipper.a external/vxl/lib/libvsl.a external/vxl/lib/libvbl.a external/vxl/lib/libvil.a -lpng /usr/local/lib/libz.so -ljpeg external/vxl/lib/libvcl.a external/vxl/lib/libgeotiff.a -ltiff external/vxl/lib/libopenjpeg2.a -lm /usr/local/cuda/lib64/libcudart_static.a -ldl -lrt -lpthread triangle/libtriangle.a -ldl -lEGL && :
+    "${GCC}" ${CFLAGS+${CFLAGS}} maind.c -o main_dyload_1
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . maind.c -L. -lc4d -o main_dyload_2
+    "${GCC}" ${CFLAGS+${CFLAGS}} -DMAIN_FOO_C maind.c -o main_foo_dyload_1
+    "${GCC}" ${CFLAGS+${CFLAGS}} -DMAIN_FOO_C -Wl,-rpath . maind.c -L. -lc4d -o main_foo_dyload_2
+    ;;
+  clean)
+    rm -f *.so *.o *.a main_*
+    ;;
+  double)
+    set +e
+    # "${GCC}" ${CFLAGS+${CFLAGS}} -c libc1.c libc2.c # Will not error, creates libc1.o and libc2.o
+    "${GCC}" ${CFLAGS+${CFLAGS}} libc1.c libc2.c -o libc.o
+    "${GCC}" ${CFLAGS+${CFLAGS}} libc1_static.o libc2_static.o
+    ;;
+  *)
+    echo "Usage:"
+    echo "  ${0} # Compiles"
+    echo "  ${0} clean # Removes artifcact"
+    echo "  ${0} double # Cause multiple symbol compiler error"
+    ;;
+esac
