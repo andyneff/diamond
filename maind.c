@@ -7,7 +7,6 @@
     printf("foo_c version 3 %d\n", x);
   }
 #endif
-void foo_a();
 
 #ifndef MYDLFLAG
   #define MYDLFLAG RTLD_NOW
@@ -16,11 +15,9 @@ void foo_a();
 int main()
 {
   printf("dynamic ok\n");
-  foo_a();
+
   void (*my_funca)();
   void (*my_funcb)();
-  void (*my_funcac)();
-  void (*my_funcbc)();
   void (*my_func2)(int);
 
   void *handle_main;

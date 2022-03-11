@@ -35,26 +35,35 @@ case "${1-}" in
     "${GCC}" ${CFLAGS+${CFLAGS}} -c main.c -o main.o
     "${GCC}" ${CFLAGS+${CFLAGS}} -DMAIN_FOO_C -c main.c -o main_foo.o
 
-    "${GCC}" ${CFLAGS+${CFLAGS}} main.o -L. -las -lbs -lc1s -lc2s -o main_1
-    "${GCC}" ${CFLAGS+${CFLAGS}} main.o -L. -las -lbs -lc2s -lc1s -o main_2
     "${GCC}" ${CFLAGS+${CFLAGS}} -L. libc1s.a -lc2s main_foo.o -las -lbs -o main_foo_0
-    "${GCC}" ${CFLAGS+${CFLAGS}} main_foo.o -L. -las -lbs -lc1s -lc2s -o main_foo_1
-    "${GCC}" ${CFLAGS+${CFLAGS}} main_foo.o -L. -las -lbs -lc2s -lc1s -o main_foo_2
 
-    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc1d -lc2d -lad -lbd -o main_3
-    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc2d -lc1d -lad -lbd -o main_4
+    "${GCC}" ${CFLAGS+${CFLAGS}}              main.o     -L. -las -lbs -lc1s -lc2s -o main_1
+    "${GCC}" ${CFLAGS+${CFLAGS}}              main.o     -L. -las -lbs -lc2s -lc1s -o main_2
+    "${GCC}" ${CFLAGS+${CFLAGS}}              main_foo.o -L. -las -lbs -lc1s -lc2s -o main_foo_1
+    "${GCC}" ${CFLAGS+${CFLAGS}}              main_foo.o -L. -las -lbs -lc2s -lc1s -o main_foo_2
+
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o     -L. -lc1d -lc2d -lad -lbd -o main_3
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o     -L. -lc2d -lc1d -lad -lbd -o main_4
     "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc1d -lc2d -lad -lbd -o main_foo_3
     "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc2d -lc1d -lad -lbd -o main_foo_4
 
-    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc1s -lc2d -las -lbd -o main_5
-    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc2s -lc1d -lad -lbs -o main_6
-    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc1s -lc2d -las -lbd -o main_foo_5
-    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc2s -lc1d -lad -lbs -o main_foo_6
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o     -L. -las -lbd -lc1s -lc2d -o main_5
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o     -L. -lad -lbs -lc2s -lc1d -o main_6
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -las -lbd -lc1s -lc2d -o main_foo_5
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lad -lbs -lc2s -lc1d -o main_foo_6
 
-    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc1d -lc2s -lad -lbs -o main_7
-    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o -L. -lc2d -lc1s -las -lbd -o main_8
-    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc1d -lc2s -lad -lbs -o main_foo_7
-    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lc2d -lc1s -las -lbd -o main_foo_8
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o     -L. -lad -lbs -lc1d -lc2s -o main_7
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main.o     -L. -las -lbd -lc2d -lc1s -o main_8
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -lad -lbs -lc1d -lc2s -o main_foo_7
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main_foo.o -L. -las -lbd -lc2d -lc1s -o main_foo_8
+
+    if [ -f "/lib64/libc.so.6" ]; then
+      libc_version=($(/lib64/libc.so.6 | sed -nE 's/.*version ([0-9]+)\.([0-9]+).*/\1 \2/p;q'))
+
+      if [ "${libc_version[0]}" -lt "2" ] || [ "${libc_version[0]}" == "2" -a "${libc_version[1]}" -lt "34" ]; then
+        CFLAGS+=" -ldl"
+      fi
+    fi
 
     "${GCC}" ${CFLAGS+${CFLAGS}} maind.c -o main_dyload_1
     "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . maind.c -L. -lc4d -o main_dyload_2
