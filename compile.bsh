@@ -65,10 +65,10 @@ case "${1-}" in
       fi
     fi
 
-    "${GCC}" ${CFLAGS+${CFLAGS}} maind.c -o main_dyload_1
-    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . maind.c -L. -lc4d -o main_dyload_2
-    "${GCC}" ${CFLAGS+${CFLAGS}} -DMAIN_FOO_C maind.c -o main_foo_dyload_1
-    "${GCC}" ${CFLAGS+${CFLAGS}} -DMAIN_FOO_C -Wl,-rpath . maind.c -L. -lc4d -o main_foo_dyload_2
+    "${GCC}" ${CFLAGS+${CFLAGS}} main-dyload.c -o main_dyload_1
+    "${GCC}" ${CFLAGS+${CFLAGS}} -Wl,-rpath . main-dyload.c -L. -lc4d -o main_dyload_2
+    "${GCC}" ${CFLAGS+${CFLAGS}} -DMAIN_FOO_C main-dyload.c -o main_foo_dyload_1
+    "${GCC}" ${CFLAGS+${CFLAGS}} -DMAIN_FOO_C -Wl,-rpath . main-dyload.c -L. -lc4d -o main_foo_dyload_2
     ;;
   clean)
     rm -f *.so *.o *.a main_*
