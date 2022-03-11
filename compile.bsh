@@ -73,7 +73,7 @@ case "${1-}" in
   clean)
     rm -f *.so *.o *.a main_*
     ;;
-  double)
+  clash)
     set +e
     # "${GCC}" ${CFLAGS+${CFLAGS}} -c libc1.c libc2.c # Will not error, creates libc1.o and libc2.o
     "${GCC}" ${CFLAGS+${CFLAGS}} libc1.c libc2.c -o libc.o
