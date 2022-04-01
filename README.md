@@ -8,7 +8,7 @@ Revisiting the diamond linking problem and demonstrating the different "orders" 
 
 On Linux, there are three times when symbols from multiple files will be linked together:
 
-1. at link time - After compiling `.c` files into `.o` and `.a` files, `ld` links references to a symbol together with their definitions into an executable or a shared library (an `.so` file). However, not all symbols are resolved now; undefined symbols, as they are called, are not fully linked until load time (the next step).
+1. at link time - After compiling `.c` files into `.o` and `.a` files, `ld` links references to symbols together with their definitions into an executable or a shared library (an `.so` file). However, not all symbols are resolved now; undefined symbols, as they are called, are not fully linked until load time (the next step).
 2. at load time - When the executable is launched, undefined symbols whose linkage was deferred at link time are resolved now. They are resolved against the dynamically-linked dependencies (the `.so` files listed by `ldd`) by `ld.so`. This linking occurs before `int main` even starts.
 3. during run time - `dlopen` can dynamically load shared libraries (`.so` files) during program execution. `ld.so` will link them (and their dependencies) into a local scope appended to the executable's global scope.
 
@@ -18,8 +18,8 @@ When linking (building) an executable or shared library (`.so` file), the rules 
 
 1. Search the `.o`'s first
 2. Always search the dynamic symbol table of the `.so`'s (the dynamically-linked dependencies)
-    - The dynamic symbol table (.dynsym) includes those symbols with definitions (`nm -D --defined`) that can be used by the linker to resolve a symbol.
-    - If `ld` locates the definition of a needed symbol within a `.so` file, a corresponding undefined symbol is added to the dynamic symbol table (`nm -u`) of the target---executable or shared library---being built. As a result, those symbols are not linked fully until load time (see Load-time resolution).
+    - The dynamic symbol table (.dynsym) includes the symbol definitions (`nm -D --defined`) that can be used by the linker to resolve a symbol.
+    - If `ld` locates the definition of a needed symbol within a `.so` file, a corresponding _undefined_ symbol is added to the dynamic symbol table (`nm -u`) of the target---executable or shared library---being built. As a result, those symbols are not linked fully until load time (see Load-time resolution).
 3. Search the `.a`'s
 
 NOTE When an executable is built, all symbols that **it** defined are not, by default, added to the dynamic symbol table; i.e., they have local, not external, visibility, and hence, are not eligible to resolve undefined symbols. Conversely, symbols in a shared library are, by default, dynamic. This can, however, be fine-tuned with the `--export-dynamic` family of flags, the `--dynamic-list` flag or the `--version-script` flag in `ld`. [1]
@@ -37,7 +37,7 @@ When the executable is launched, its dynamically-linked dependencies (the `.so` 
 
 Specifically, each undefined symbol (the result of step 2 from `ld` - Link-time resolution) is resolved according to the following rules, where the first definition found in the dynamic symbol table wins:
 
-1. Search symbols in the executable. (However, as noted above, defined symbols are not, by default, found in an executable's dynamic-symbol table.)
+1. Search symbols in the executable. (However, as noted above, defined symbols are not, by default, found in an executable's dynamic symbol table.)
 2. Search the dynamically-linked libraries in a breadth-first manner.
 
 ## `dlopen` - Run-time resolution
@@ -50,7 +50,7 @@ Much like link-time resolution, each undefined symbol from the dynamically-loade
 2. Search the dynamically-linked dependencies of the executable in a breadth-first manner.
 3. Search the dynamically-linked dependencies of the dlopen'd shared library in a breadth-first manner. These symbols belong to a private link chain and cannot be used to bind symbols in other dlopen's.
 
-NOTE Although not recommended, if `RTLD_GLOBAL` is set (in contrast to `RTLD_LOCAL`, which is the default), `dlopen` will load symbols into the global namespace. There are other `ld` flags as well that can affect linking like `RTLD_DEEPBIND`, but also flags that can be set in the shared object when linking it together like `DF_SYMBOLIC`. These flags are also not recommended. [2]
+NOTE Although not recommended, if the `RTLD_GLOBAL` flag is set (in contrast to `RTLD_LOCAL`, which is the default), `dlopen` will load symbols into the global namespace. There are other `ld` flags as well that can affect linking like `RTLD_DEEPBIND`, but also flags that can be set in the shared object when linking it together like `DF_SYMBOLIC`. These flags are also not recommended. [2]
 
 # Tests
 
