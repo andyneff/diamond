@@ -10,7 +10,7 @@ void foo_b();
   }
   void foo_d(int x)
   {
-    printf("foo_d version fu %d\n", x);
+    printf("foo_d %d\n", x);
   }
 #endif
 
