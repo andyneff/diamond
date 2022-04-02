@@ -202,4 +202,5 @@ Explanation: This is an interesting chain of events:
 # References
 
 [1] https://stackoverflow.com/questions/26294841/having-object-file-symbols-become-dynamic-symbols-in-executable
+
 [2] Ulrich Drepper, How To Write Shared Libraries. December 10, 2011. Available: https://www.akkadia.org/drepper/dsohowto.pdf
